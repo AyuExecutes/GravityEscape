@@ -3,7 +3,6 @@
 #include <math.h>
 #include "graphics.h"
 #include "graphics3d.h"
-#include "teapot_data.h"
 #include <freertos/FreeRTOS.h>
 #include <freertos/event_groups.h>
 #include <freertos/task.h>
@@ -198,49 +197,6 @@ void quad_init() {
 void quad_free() {
     free(quad_lists);
     free(quads);
-}
-
-
-void draw_teapot(vec2f pos, float size, vec3f rot, colourtype col, int multicolour) {
-
-    quad_init();
-    material_colour=(vec3f){col.r,col.g,col.b};
-    maketrotationmatrix(rot,pos,size);
-
-    // the teapot is made from 32 patches as follows:
-    // 28-31=base
-    // 20-27=lid
-    // 16-19=spout
-    // 12-15=handle
-    // 8-11=bottom body
-    // 0-7=top body
-
-    nquads=0;
-    for(int ii=0;ii<32;ii++) {
-        if(multicolour)
-            material_colour=(vec3f){(ii&0x3)*64.0f+63,(ii/16)*128.0f,((ii&0xc)/4)*64.0f+63};
-        // each patch is defined by 16 control points
-        vec3f p[4][4];
-        for(int j=0;j<4;j++) {
-            for(int k=0;k<4; k++) {
-                vec3f vv=teapotVertices[teapotPatches[ii][j*4+k]-1];
-                if(ii>19&&ii<28) {
-                    vv.x*=1.077;
-                    vv.y*=1.077;
-                }
-                if(ii>15&&ii<18) {
-                    if(j==0)
-                        vv.x+=0.23;
-                    if(j==1)
-                        vv.z+=0.4;
-                }
-                p[j][k]=vrotate(vv);
-            }
-        }
-        add_bezier_patch(p);
-    }
-    draw_all_quads();
-    quad_free();
 }
 
 const uint8_t cubeQuads[][4] = { 
