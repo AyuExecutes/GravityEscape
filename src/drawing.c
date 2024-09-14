@@ -22,6 +22,7 @@
 #include <esp_sntp.h>
 #include <nvs_flash.h>
 
+
 int render_menu(char * title, int nentries, char *entries[], int select) {
     // for fps calculation
     int64_t current_time;

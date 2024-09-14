@@ -1,6 +1,3 @@
-/* TTGO Demo example for 159236
-
-*/
 #include <driver/gpio.h>
 
 #include <esp_system.h>
@@ -22,11 +19,16 @@
 #include "graphics.h"
 #include "input_output.h"
 #include "drawing.h"
+#include "game.h"
 
 #define PAD_START 3
 #define PAD_END 5
 
 #define SHOW_PADS
+
+enum CurrentScreen{
+    MENU, GAME, SCORE, HIGHSCORE
+};
 
 void app_main() {
     // initialise button handling
@@ -47,20 +49,50 @@ void app_main() {
     // initialise graphics and lcd display
     graphics_init();
     cls(0);
+
+    set_orientation(PORTRAIT);
+
     // main menu
+    enum CurrentScreen currentScreen = MENU;
+
     int sel=0;
+    
+    char *entries[]={"Start Game", "Highscore"};
+
     while(1) {
-        char *entries[]={"Start Game", "Highscore"};
-        sel=render_menu("Welcome",sizeof(entries)/sizeof(char *),entries,sel);
-        switch(sel) {
-            case 0:
-                //start_game();            
+
+        switch (currentScreen){
+
+            case MENU:
+                sel=render_menu("Welcome",sizeof(entries)/sizeof(char *),entries,sel);
+                switch(sel) {
+                    case 0:
+                        currentScreen = GAME;          
+                        break;
+                    case 1:
+                        currentScreen = HIGHSCORE;
+                        break;
+                    default:
+                        return;
+                }
+
                 break;
-            case 1:
-                //show_high_score();
+
+            case GAME:
+                render_game();
                 break;
+
+            case SCORE:
+                // render the score
+                break;
+
+            case HIGHSCORE:
+                // render the highscore
+                break;
+
             default:
                 return;
+
         }
     }
 }
