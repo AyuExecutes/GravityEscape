@@ -17,16 +17,39 @@
 #include <esp_sntp.h>
 #include <nvs_flash.h>
 
-
-
 struct enemy_block {
     float x;
     float y;
     float speed;
     bool active;
+    int colour;
+    int colour_step;
 };
 
 int const maximum_enemies = 12;
+int const enemy_colour_step = 15;
+
+void spawn_enemies(int number_of_enemies, int enemy_width, int enemy_height, int enemy_speed, struct enemy_block enemies[]){
+
+    for (int i = 0; i < number_of_enemies; i++) {
+
+        for (int j = 0; j < maximum_enemies; j++){
+
+            if (enemies[j].active == false){
+
+                enemies[j].x = rand() % (display_width - enemy_width);
+                enemies[j].y = -((rand() % (enemy_height * 4)) + enemy_height);
+                enemies[j].speed = enemy_speed;
+                enemies[j].colour = 102;
+                enemies[j].colour_step = enemy_colour_step;
+                enemies[j].active = true;
+
+                break;
+
+            }
+        }
+    }
+}
 
 void render_game() {
 
@@ -38,6 +61,9 @@ void render_game() {
     int const player_width = display_width * 0.2;
     int const player_height = display_height * 0.05;
 
+    int const enemy_height = display_height * 0.1;
+    int const enemy_width = display_width * 0.05;
+
     int current_score = 0;
     int player_x = (display_width / 2) - (player_width / 2);
     int player_y = display_height - player_height;
@@ -46,7 +72,15 @@ void render_game() {
 
     struct enemy_block enemies[maximum_enemies];
 
+    // initialize enemies to inactive
+    for (int i = 0; i < maximum_enemies; i++){
+        enemies[i].active = false;
+    }
+
+    spawn_enemies(1, enemy_width, enemy_height, 1, enemies);
+
     int frame=0; 
+
     while(1) {
         cls(rgbToColour(50,50,50));
         //setFont(FONT_DEJAVU18);
@@ -56,7 +90,15 @@ void render_game() {
         // setFontColour(255, 255, 255);
         // setFont(FONT_UBUNTU16);
 
-        draw_rectangle(player_x, player_y, player_width, player_height, rgbToColour(255, 0, 127));
+        draw_rectangle(player_x, player_y, player_width, player_height, rgbToColour(153, 255, 153));
+
+        for (int i = 0; i < maximum_enemies; i++){
+
+            if (enemies[i].active == true){
+                
+                draw_rectangle(enemies[i].x, enemies[i].y, enemy_width, enemy_height, rgbToColour(enemies[i].colour, 0, 0));
+            }
+        }
 
         flip_frame();
         current_time = esp_timer_get_time();
@@ -109,6 +151,35 @@ void render_game() {
 
             if (player_x >= display_width - player_width) {
                 player_x = display_width - player_width;
+            }
+        }
+
+        for (int i = 0; i < maximum_enemies; i++){
+
+            if (enemies[i].active == true){
+
+                enemies[i].y += enemies[i].speed;
+
+                if (enemies[i].y > display_height){
+                    enemies[i].active = false;
+
+                    spawn_enemies(4, enemy_width, enemy_height, 1, enemies);
+
+                } else {
+                    
+                    enemies[i].colour += enemies[i].colour_step;
+
+                    if (enemies[i].colour > 255){
+                        enemies[i].colour = 255;
+                        enemies[i].colour_step = -enemy_colour_step;
+                    } 
+
+                    if (enemies[i].colour < 102){
+                        enemies[i].colour = 102;
+                        enemies[i].colour_step = enemy_colour_step;
+                    }
+
+                }
             }
         }
         
