@@ -20,6 +20,7 @@
 #include "input_output.h"
 #include "drawing.h"
 #include "game.h"
+#include "score.h"
 
 #define PAD_START 3
 #define PAD_END 5
@@ -54,6 +55,8 @@ void app_main() {
 
     // main menu
     enum CurrentScreen currentScreen = MENU;
+    
+    int last_score = 0;
 
     int sel=0;
     
@@ -79,11 +82,13 @@ void app_main() {
                 break;
 
             case GAME:
-                render_game();
+                last_score = render_game();
+                currentScreen = SCORE;
                 break;
 
             case SCORE:
-                // render the score
+                render_score(last_score);
+                currentScreen = MENU;
                 break;
 
             case HIGHSCORE:

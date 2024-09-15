@@ -28,6 +28,7 @@ struct enemy_block {
 
 int const maximum_enemies = 12;
 int const enemy_colour_step = 15;
+int const points_per_miss = 100;
 
 void spawn_enemies(int number_of_enemies, int enemy_width, int enemy_height, int enemy_speed, struct enemy_block enemies[]){
 
@@ -51,7 +52,7 @@ void spawn_enemies(int number_of_enemies, int enemy_width, int enemy_height, int
     }
 }
 
-void render_game() {
+int render_game() {
 
     // for fps calculation
     int64_t current_time;
@@ -80,15 +81,15 @@ void render_game() {
     spawn_enemies(1, enemy_width, enemy_height, 1, enemies);
 
     int frame=0; 
+    bool potential_hit = false;
+
+    setFont(FONT_SMALL);
+    setFontColour(255, 255, 255);
 
     while(1) {
+
+
         cls(rgbToColour(50,50,50));
-        //setFont(FONT_DEJAVU18);
-        // draw_rectangle(0,3,display_width,24,rgbToColour(220,220,0));
-        
-        // setFontColour(0, 0, 0);
-        // setFontColour(255, 255, 255);
-        // setFont(FONT_UBUNTU16);
 
         draw_rectangle(player_x, player_y, player_width, player_height, rgbToColour(153, 255, 153));
 
@@ -100,7 +101,16 @@ void render_game() {
             }
         }
 
+        gprintf("Score: %d\n", current_score);
+
+        if (potential_hit){
+            // draw borders of warning left and right
+            draw_rectangle(0, 0, 2, display_height, rgbToColour(255, 128, 0));
+            draw_rectangle(display_width - 2, 0, display_width, display_height, rgbToColour(255, 128, 0));
+        }
+
         flip_frame();
+
         current_time = esp_timer_get_time();
         if ((frame++ % 10) == 0) {
             printf("FPS:%f %d %d\n", 1.0e6 / (current_time - last_time),
@@ -153,17 +163,44 @@ void render_game() {
                 player_x = display_width - player_width;
             }
         }
+        
+        potential_hit = false;
 
         for (int i = 0; i < maximum_enemies; i++){
 
             if (enemies[i].active == true){
 
+                int enemies_left = enemies[i].x;
+                int enemies_right = enemies[i].x + enemy_width;
+                int player_left = player_x;
+                int player_right = player_x + player_width;
+
+                if (((enemies_left > player_left) && (enemies_left < player_right)) || ((enemies_right > player_left) && (enemies_right < player_right))){
+                    
+                    if (enemies[i].y > 0){
+
+                        potential_hit = true;
+
+                    }
+                    
+                    int enemies_top = enemies[i].y;
+                    int enemies_bottom = enemies[i].y + enemy_height;
+                    int player_top = player_y;
+                    int player_bottom = player_y + player_height;
+
+                    if (((enemies_bottom > player_top) && (enemies_top < player_bottom))){
+                        return current_score;
+                    }
+                }
+                
+
                 enemies[i].y += enemies[i].speed;
 
                 if (enemies[i].y > display_height){
                     enemies[i].active = false;
+                    current_score += points_per_miss;
 
-                    spawn_enemies(4, enemy_width, enemy_height, 1, enemies);
+                    spawn_enemies(1, enemy_width, enemy_height, 1, enemies);
 
                 } else {
                     
