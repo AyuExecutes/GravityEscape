@@ -39,7 +39,7 @@ void spawn_enemies(int number_of_enemies, int enemy_width, int enemy_height, int
             if (enemies[j].active == false){
 
                 enemies[j].x = rand() % (display_width - enemy_width);
-                enemies[j].y = -((rand() % (enemy_height * 4)) + enemy_height);
+                enemies[j].y = -(enemy_height * (i + 1));
                 enemies[j].speed = enemy_speed;
                 enemies[j].colour = 102;
                 enemies[j].colour_step = enemy_colour_step;
@@ -57,14 +57,26 @@ int render_game() {
     // for fps calculation
     int64_t current_time;
     int64_t last_time = esp_timer_get_time();
+    int64_t last_spawn_time = esp_timer_get_time();
+    int64_t last_difficulty_time = esp_timer_get_time();
+
+    char string_buffer[256];
 
     int const player_speed = 2;
     int const player_width = display_width * 0.2;
     int const player_height = display_height * 0.05;
+    int const difficulty_interval = 15000;
+    int const max_difficulty = 5;
 
     int const enemy_height = display_height * 0.1;
     int const enemy_width = display_width * 0.05;
 
+    int current_spawn_rate = 3500;
+    int current_spawn_count = 1;
+    int current_spawn_speed = 1;
+
+    int current_difficulty_level = 1;
+    
     int current_score = 0;
     int player_x = (display_width / 2) - (player_width / 2);
     int player_y = display_height - player_height;
@@ -78,7 +90,7 @@ int render_game() {
         enemies[i].active = false;
     }
 
-    spawn_enemies(1, enemy_width, enemy_height, 1, enemies);
+    spawn_enemies(current_spawn_count, enemy_width, enemy_height, current_spawn_speed, enemies);
 
     int frame=0; 
     bool potential_hit = false;
@@ -87,7 +99,6 @@ int render_game() {
     setFontColour(255, 255, 255);
 
     while(1) {
-
 
         cls(rgbToColour(50,50,50));
 
@@ -101,12 +112,20 @@ int render_game() {
             }
         }
 
-        gprintf("Score: %d\n", current_score);
-
         if (potential_hit){
             // draw borders of warning left and right
             draw_rectangle(0, 0, 2, display_height, rgbToColour(255, 128, 0));
             draw_rectangle(display_width - 2, 0, display_width, display_height, rgbToColour(255, 128, 0));
+        }
+        
+        snprintf(string_buffer, 64, "Score: %d", current_score);
+        print_xy(string_buffer, 0, 0);
+
+        sniprintf(string_buffer, 64, "Lvl:");
+        print_xy(string_buffer, display_width / 2, 0);
+
+        for (int i = 0; i < current_difficulty_level ; i++){
+            draw_rectangle((display_width / 2) + (i * 9) + 20, 0, 6, 10, rgbToColour(0, 255, 255));
         }
 
         flip_frame();
@@ -118,6 +137,56 @@ int render_game() {
                 heap_caps_get_free_size(MALLOC_CAP_32BIT));
             
             vTaskDelay(1);
+        }
+
+        if ((current_time - last_spawn_time) / 1000 > current_spawn_rate){
+            spawn_enemies(current_spawn_count, enemy_width, enemy_height, current_spawn_speed, enemies);
+            last_spawn_time = current_time;
+        }
+
+        if ((current_time - last_difficulty_time) / 1000 > difficulty_interval){
+            last_difficulty_time = current_time;
+            current_difficulty_level += 1;
+
+            if (current_difficulty_level > max_difficulty){
+                current_difficulty_level = max_difficulty;
+            }
+
+            switch (current_difficulty_level){
+                
+                case 1: 
+                    current_spawn_rate = 3500;
+                    current_spawn_count = 1;
+                    current_spawn_speed = 1;
+                    break;
+
+                case 2:
+                    current_spawn_rate = 3000;
+                    current_spawn_count = 2;
+                    current_spawn_speed = 1;
+                    break;
+
+                case 3:
+                    current_spawn_rate = 3000;
+                    current_spawn_count = 3;
+                    current_spawn_speed = 1;
+                    break;
+
+                case 4:
+                    current_spawn_rate = 2500;
+                    current_spawn_count = 3;
+                    current_spawn_speed = 2;
+                    break;
+
+                case 5:
+                    current_spawn_rate = 2000;
+                    current_spawn_count = 4;
+                    current_spawn_speed = 2;
+                    break;
+
+                default:
+                    break;
+            }
         }
 
         last_time = current_time;
@@ -200,8 +269,6 @@ int render_game() {
                     enemies[i].active = false;
                     current_score += points_per_miss;
 
-                    spawn_enemies(1, enemy_width, enemy_height, 1, enemies);
-
                 } else {
                     
                     enemies[i].colour += enemies[i].colour_step;
@@ -222,6 +289,7 @@ int render_game() {
         
     }
 }
+
 
 
 
