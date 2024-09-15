@@ -30,7 +30,7 @@ int const maximum_enemies = 12;
 int const enemy_colour_step = 15;
 int const points_per_miss = 100;
 
-void spawn_enemies(int number_of_enemies, int enemy_width, int enemy_height, int enemy_speed, struct enemy_block enemies[]){
+void spawn_enemies(int number_of_enemies, int enemy_width, int enemy_height, float enemy_speed, struct enemy_block enemies[]){
 
     for (int i = 0; i < number_of_enemies; i++) {
 
@@ -57,7 +57,7 @@ int render_game() {
     // for fps calculation
     int64_t current_time;
     int64_t last_time = esp_timer_get_time();
-    int64_t last_spawn_time = esp_timer_get_time();
+    int64_t last_spawn_time = 0;
     int64_t last_difficulty_time = esp_timer_get_time();
 
     char string_buffer[256];
@@ -71,11 +71,12 @@ int render_game() {
     int const enemy_height = display_height * 0.1;
     int const enemy_width = display_width * 0.05;
 
-    int current_spawn_rate = 3500;
-    int current_spawn_count = 1;
-    int current_spawn_speed = 1;
+    int current_spawn_rate = 0;
+    int current_spawn_count = 0;
+    int current_spawn_speed = 0;
 
     int current_difficulty_level = 1;
+    bool difficulty_changed = true;
     
     int current_score = 0;
     int player_x = (display_width / 2) - (player_width / 2);
@@ -89,8 +90,6 @@ int render_game() {
     for (int i = 0; i < maximum_enemies; i++){
         enemies[i].active = false;
     }
-
-    spawn_enemies(current_spawn_count, enemy_width, enemy_height, current_spawn_speed, enemies);
 
     int frame=0; 
     bool potential_hit = false;
@@ -119,10 +118,10 @@ int render_game() {
         }
         
         snprintf(string_buffer, 64, "Score: %d", current_score);
-        print_xy(string_buffer, 0, 0);
+        print_xy(string_buffer, 0, 1);
 
         sniprintf(string_buffer, 64, "Lvl:");
-        print_xy(string_buffer, display_width / 2, 0);
+        print_xy(string_buffer, display_width / 2, 1);
 
         for (int i = 0; i < current_difficulty_level ; i++){
             draw_rectangle((display_width / 2) + (i * 9) + 20, 0, 6, 10, rgbToColour(0, 255, 255));
@@ -139,18 +138,18 @@ int render_game() {
             vTaskDelay(1);
         }
 
-        if ((current_time - last_spawn_time) / 1000 > current_spawn_rate){
-            spawn_enemies(current_spawn_count, enemy_width, enemy_height, current_spawn_speed, enemies);
-            last_spawn_time = current_time;
-        }
-
         if ((current_time - last_difficulty_time) / 1000 > difficulty_interval){
             last_difficulty_time = current_time;
             current_difficulty_level += 1;
+            difficulty_changed = true;
 
             if (current_difficulty_level > max_difficulty){
                 current_difficulty_level = max_difficulty;
             }
+
+        }
+
+        if (difficulty_changed){
 
             switch (current_difficulty_level){
                 
@@ -163,30 +162,38 @@ int render_game() {
                 case 2:
                     current_spawn_rate = 3000;
                     current_spawn_count = 2;
-                    current_spawn_speed = 1;
+                    current_spawn_speed = 1.2;
                     break;
 
                 case 3:
                     current_spawn_rate = 3000;
                     current_spawn_count = 3;
-                    current_spawn_speed = 1;
+                    current_spawn_speed = 1.5;
                     break;
 
                 case 4:
                     current_spawn_rate = 2500;
                     current_spawn_count = 3;
-                    current_spawn_speed = 2;
+                    current_spawn_speed = 1.7;
                     break;
 
                 case 5:
                     current_spawn_rate = 2000;
                     current_spawn_count = 4;
-                    current_spawn_speed = 2;
+                    current_spawn_speed = 1.8;
                     break;
 
                 default:
                     break;
             }
+
+            difficulty_changed = false;
+        }
+
+        
+        if ((current_time - last_spawn_time) / 1000 > current_spawn_rate){
+            spawn_enemies(current_spawn_count, enemy_width, enemy_height, current_spawn_speed, enemies);
+            last_spawn_time = current_time;
         }
 
         last_time = current_time;
