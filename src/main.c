@@ -14,9 +14,10 @@
 #include "fonts.h"
 #include "graphics.h"
 #include "input_output.h"
-#include "drawing.h"
+#include "menu.h"
 #include "game.h"
 #include "score.h"
+#include "instructions.h"
 
 #define PAD_START 3
 #define PAD_END 5
@@ -24,7 +25,7 @@
 #define SHOW_PADS
 
 enum CurrentScreen{
-    MENU, GAME, SCORE, HIGHSCORE
+    MENU, GAME, SCORE, INSTRUCTIONS
 };
 
 void app_main() {
@@ -50,13 +51,13 @@ void app_main() {
     set_orientation(PORTRAIT);
 
     // Set current screen to Menu which is the first screen to be displayed
-    enum CurrentScreen currentScreen = MENU;
+    enum CurrentScreen currentScreen = INSTRUCTIONS;
     
     int last_score = 0;
     int selected_menu = 0;
     
     // Menu has two entries: to start the game and to view the highscore
-    char *entries[]={"Start Game", "Highscore"};
+    char *entries[]={"Start Game", "Instructions"};
 
     while(1) {
 
@@ -74,7 +75,7 @@ void app_main() {
                         currentScreen = GAME;          
                         break;
                     case 1:
-                        currentScreen = HIGHSCORE;
+                        currentScreen = INSTRUCTIONS;
                         break;
                     default:
                         return;
@@ -90,13 +91,21 @@ void app_main() {
 
             // Show the Score screen to display the score after the game is over
             case SCORE:
+
+                // Do a check of the current score, if it is larger than the last high score, then high score is updated
+                if (last_score > storage_read_int("high_score", 0)){
+
+                    storage_write_int("high_score", last_score);
+                }
+
                 render_score(last_score);
                 currentScreen = MENU;
                 break;
 
-            // Show the High Score screen to display the high score from the game
-            case HIGHSCORE:
-                // render the highscore
+            // Show the Instructions before the game starts / also when user click
+            case INSTRUCTIONS:
+                render_instructions();
+                currentScreen = MENU;
                 break;
 
             default:

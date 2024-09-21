@@ -2,7 +2,7 @@
 #include <esp_system.h>
 #include "fonts.h"
 #include "graphics.h"
-#include "drawing.h"
+#include "menu.h"
 #include "input_output.h"
 #include <driver/touch_pad.h>
 #include <freertos/FreeRTOS.h>
@@ -16,6 +16,7 @@
 #include <esp_log.h>
 #include <esp_sntp.h>
 #include <nvs_flash.h>
+//#include <driver/timer.h>   // hardware timer header
 
 // Struct to hold each enemy block
 struct enemy_block {
