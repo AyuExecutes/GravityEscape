@@ -30,7 +30,7 @@ struct rectangle_background {
 // The constant values
 const int total_rectangles = 6;     // total number of rectangles will be displayed
 const int colour_step_speed = 3;    // speed of the colour change 
-const int wait_time_until_key_press = 3000000; // 3 seconds
+const int wait_time_until_key_press = 2000000; // 2 seconds
 
 void render_score(int last_score){
 
@@ -127,7 +127,7 @@ void render_score(int last_score){
 
         last_time = current_time;
 
-        // check if time has passed 3 seconds, then allow key presses
+        // check if time has passed 2 seconds, then allow key presses
         if (current_time - start_time > wait_time_until_key_press){
             allow_key_presses = true;
         }
