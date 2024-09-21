@@ -17,7 +17,6 @@
 #include <esp_sntp.h>
 #include <nvs_flash.h>
 
-
 void render_instructions(){
 
     // for fps calculation
@@ -28,18 +27,23 @@ void render_instructions(){
 
     while(1) {
 
-        cls(rgbToColour(0,0,153)); // dark blue
-        setFont(FONT_SMALL);
+        cls(rgbToColour(153, 0, 76)); 
+
+        // The Insructions title
+        setFont(FONT_UBUNTU16);
         setFontColour(255, 255, 255);
-    
         gprintf("INSTRUCTIONS\n\n");
+
+        // The instructions text
+        setFont(FONT_SMALL);
         gprintf("Start: Press 'Start Game'.\n\n");
         gprintf("Controls: Right to select,\nLeft to keep choosing.\n\n");
-        gprintf("Gameplay: You start in the\nmiddle; avoid falling\nenemies.\n\n");
-        gprintf("Levels: Level up every 15s,\nmax level 5. Speed and\nenemies increase.\n\n");
-        gprintf("Warning: Orange borders\nflash if danger is near.\n\n");
-        gprintf("Game Over: Hit a block,\ngame ends, high score\nshown.");
+        gprintf("Gameplay: You start in the\nmiddle and avoid falling\nenemies.\n\n");
+        gprintf("Levels: Level up every 15s,\nmax level is 5. Speed and\nenemies increase.\n\n");
+        gprintf("Warning: Orange borders\nappear if danger is near.\n\n");
+        gprintf("Game Over: Hit an enemy,\ngame ends, high score\nshown.");
 
+        // To get out of the instructions screen
         setFontColour(255, 255, 255);
         setFont(FONT_SMALL);
         print_xy("Press any key", CENTER, display_height - 24);
@@ -61,9 +65,6 @@ void render_instructions(){
 
         switch(key) {
             case LEFT_DOWN: 
-                return;
-                break;
-
             case RIGHT_DOWN: 
                 return;
                 break;

@@ -50,20 +50,20 @@ void app_main() {
     cls(0);
     set_orientation(PORTRAIT);
 
-    // Set current screen to Menu which is the first screen to be displayed
+    // Set current screen to Menu which is the first screen to be displayed (in this case, instructions because the game always starts with instructions)
     enum CurrentScreen currentScreen = INSTRUCTIONS;
     
     int last_score = 0;
     int selected_menu = 0;
     
-    // Menu has two entries: to start the game and to view the highscore
+    // Menu has two entries: to start the game and to view instructions
     char *entries[]={"Start Game", "Instructions"};
 
     while(1) {
 
         switch (currentScreen){
             
-            // Show the Main Menu screen / Welcome screen 
+            // Show the Main Menu screen to select the game or instructions
             case MENU:
 
                 // Show the menu and wait for the respond based on the selection
@@ -102,7 +102,7 @@ void app_main() {
                 currentScreen = MENU;
                 break;
 
-            // Show the Instructions before the game starts / also when user click
+            // Show the Instructions before the game starts / also when user chooses it from the menu
             case INSTRUCTIONS:
                 render_instructions();
                 currentScreen = MENU;

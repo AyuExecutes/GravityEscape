@@ -16,7 +16,6 @@
 #include <esp_log.h>
 #include <esp_sntp.h>
 #include <nvs_flash.h>
-//#include <driver/timer.h>   // hardware timer header
 
 // Struct to hold each enemy block
 struct enemy_block {
@@ -125,7 +124,7 @@ int render_game() {
 
     while(1) {
 
-        cls(rgbToColour(50, 50, 50));
+        cls(rgbToColour(51, 50, 102));
 
         // draw the player
         draw_rectangle(player_x, player_y, player_width, player_height, rgbToColour(153, 255, 153));

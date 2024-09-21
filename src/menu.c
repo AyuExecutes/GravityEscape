@@ -1,12 +1,9 @@
 #include <driver/gpio.h>
-
 #include <esp_system.h>
-
 #include "fonts.h"
 #include "graphics.h"
 #include "menu.h"
 #include "input_output.h"
-
 #include <driver/touch_pad.h>
 #include <freertos/FreeRTOS.h>
 #include <freertos/event_groups.h>
@@ -15,8 +12,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
-
 #include <math.h>
 #include <esp_log.h>
 #include <esp_sntp.h>
@@ -24,11 +19,14 @@
 
 
 int render_menu(char * title, int nentries, char *entries[], int select) {
+
     // for fps calculation
     int64_t current_time;
     int64_t last_time = esp_timer_get_time();
    
     int frame = 0; 
+
+    // Prepare storage for high score and set default value to 0 to begin with
     int high_score = storage_read_int("high_score", 0);
     char high_score_str[64];
     snprintf(high_score_str, 64, "%d", high_score);
@@ -38,23 +36,31 @@ int render_menu(char * title, int nentries, char *entries[], int select) {
         setFont(FONT_DEJAVU18);
         draw_rectangle(0, (select * 25) + 57, display_width, 22, rgbToColour(204, 255, 153));
         
-        setFontColour(153, 0, 76);
+        // For the Welcome title
+        setFontColour(0, 102, 51);
         print_xy("WELCOME", CENTER, 25);
+
+        // For the choices in the menu
         setFontColour(204, 0, 102);
         setFont(FONT_UBUNTU16);
 
-        for(int i=0;i<nentries;i++) {
+        for (int i = 0; i < nentries; i++) {
             print_xy(entries[i], CENTER, LASTY + ((i==0) ? 35 : 25)); 
         }  
 
+        // For the High Score title
+        setFontColour(0, 102, 51);
         setFont(FONT_UBUNTU16);
         print_xy("HIGH SCORE", CENTER, display_height - 100);
 
+        // For the High Score value
+        setFontColour(204, 0, 102);
         setFont(FONT_DEJAVU18);
         print_xy(high_score_str, CENTER, display_height - 75);
 
+        // For the icons controls
         setFont(FONT_UBUNTU16);
-
+        setFontColour(0, 102, 51);
         print_xy("\x86",4,display_height-16); // down arrow 
         print_xy("\x90",display_width-16,display_height-16); // OK
 
