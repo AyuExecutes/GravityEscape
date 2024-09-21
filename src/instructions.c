@@ -23,7 +23,7 @@ void render_instructions(){
     int64_t current_time;
     int64_t last_time = esp_timer_get_time();
 
-    int frame=0; 
+    int frame = 0; 
 
     while(1) {
 

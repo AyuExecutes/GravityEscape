@@ -24,13 +24,16 @@
 
 #define SHOW_PADS
 
+// Screen enum to keep track of the current screen
 enum CurrentScreen{
     MENU, GAME, SCORE, INSTRUCTIONS
 };
 
 void app_main() {
+
     // initialise button handling
     input_output_init();
+
     // Initialize NVS
     esp_err_t err = nvs_flash_init();
     if (err == ESP_ERR_NVS_NO_FREE_PAGES || err == ESP_ERR_NVS_NEW_VERSION_FOUND) {
@@ -40,8 +43,8 @@ void app_main() {
         err = nvs_flash_init();
     }
     ESP_ERROR_CHECK( err );
+
     // ===== Set time zone to NZ time using custom daylight savings rule======
-    // if you are anywhere else in the world, this will need to be changed
     setenv("TZ", "NZST-12:00:00NZDT-13:00:00,M9.5.0,M4.1.0", 0);
     tzset();
 
@@ -50,7 +53,7 @@ void app_main() {
     cls(0);
     set_orientation(PORTRAIT);
 
-    // Set current screen to Menu which is the first screen to be displayed (in this case, instructions because the game always starts with instructions)
+    // Set current screen to Instructions which is the first screen to be displayed (in this case, Instructions because the game always starts with the Instructions)
     enum CurrentScreen currentScreen = INSTRUCTIONS;
     
     int last_score = 0;
@@ -83,7 +86,7 @@ void app_main() {
 
                 break;
 
-            // Show the Game screen to play the game
+            // Show the Game screen to play the game, when game ended, it will show the score screen
             case GAME:
                 last_score = render_game();
                 currentScreen = SCORE;

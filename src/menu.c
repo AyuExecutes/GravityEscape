@@ -17,7 +17,7 @@
 #include <esp_sntp.h>
 #include <nvs_flash.h>
 
-
+// Show the menu screen (welcome screen with options to start the game or view instructions)
 int render_menu(char * title, int nentries, char *entries[], int select) {
 
     // for fps calculation
@@ -28,12 +28,17 @@ int render_menu(char * title, int nentries, char *entries[], int select) {
 
     // Prepare storage for high score and set default value to 0 to begin with
     int high_score = storage_read_int("high_score", 0);
+
+    // Print the high score to the screen
     char high_score_str[64];
     snprintf(high_score_str, 64, "%d", high_score);
 
     while(1) {
+
         cls(rgbToColour(255, 204, 229));
         setFont(FONT_DEJAVU18);
+
+        // For the selected item background
         draw_rectangle(0, (select * 25) + 57, display_width, 22, rgbToColour(204, 255, 153));
         
         // For the Welcome title
@@ -65,6 +70,7 @@ int render_menu(char * title, int nentries, char *entries[], int select) {
         print_xy("\x90",display_width-16,display_height-16); // OK
 
         flip_frame();
+
         current_time = esp_timer_get_time();
         if ((frame++ % 10) == 0) {
             printf("FPS:%f %d %d\n", 1.0e6 / (current_time - last_time),

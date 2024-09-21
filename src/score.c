@@ -30,7 +30,7 @@ struct rectangle_background {
 // The constant values
 const int total_rectangles = 6;     // total number of rectangles will be displayed
 const int colour_step_speed = 3;    // speed of the colour change 
-const int wait_time_until_key_press = 2000000; // 2 seconds
+const int wait_time_until_key_press = 2000000; // 2 seconds wait time until key press is allowed
 
 void render_score(int last_score){
 
@@ -39,7 +39,7 @@ void render_score(int last_score){
     int64_t current_time;
     int64_t last_time = esp_timer_get_time();
 
-    // for the key press to be only appeared when after 3 seconds passed (to stop accidental key presses)
+    // for the key press to be only appeared when after 2 seconds passed (to stop accidental key presses)
     bool allow_key_presses = false;
 
     struct rectangle_background rectangles[total_rectangles];
@@ -84,7 +84,7 @@ void render_score(int last_score){
             rectangles[i].colour += rectangles[i].colour_step;
 
 
-            // check for the boundaries and depending on that, the direction is also changed
+            // check for the boundaries and depending on that, the direction is also changed (bouncing up and down effect)
             if (rectangles[i].colour > 255){
                 rectangles[i].colour = 255;
                 rectangles[i].colour_step = -colour_step_speed;
