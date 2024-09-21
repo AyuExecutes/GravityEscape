@@ -1,12 +1,9 @@
 #include <driver/gpio.h>
-
 #include <esp_system.h>
-
 #include "input_output.h"
 #include "fonts.h"
 #include "graphics.h"
-#include "drawing.h"
-
+#include "menu.h"
 #include <driver/touch_pad.h>
 #include <freertos/FreeRTOS.h>
 #include <freertos/event_groups.h>
@@ -15,7 +12,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
 #include <math.h>
 #include <esp_log.h>
 #include <esp_sntp.h>
