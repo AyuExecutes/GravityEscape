@@ -30,12 +30,17 @@ struct rectangle_background {
 // The constant values
 const int total_rectangles = 6;     // total number of rectangles will be displayed
 const int colour_step_speed = 3;    // speed of the colour change 
+const int wait_time_until_key_press = 3000000; // 3 seconds
 
 void render_score(int last_score){
 
     // for fps calculation
+    int64_t start_time = esp_timer_get_time();
     int64_t current_time;
     int64_t last_time = esp_timer_get_time();
+
+    // for the key press to be only appeared when after 3 seconds passed (to stop accidental key presses)
+    bool allow_key_presses = false;
 
     struct rectangle_background rectangles[total_rectangles];
     int rectangle_size_step = display_width / total_rectangles / 2;     // to make it even on both sides
@@ -101,9 +106,13 @@ void render_score(int last_score){
         snprintf(score_str,64,"Score: %d", last_score);
         print_xy(score_str,CENTER, LASTY + 18);
 
-        setFontColour(255, 255, 255);
-        setFont(FONT_SMALL);
-        print_xy("Press any key", CENTER, display_height - 24);
+        if (allow_key_presses){
+
+            setFontColour(255, 255, 255);
+            setFont(FONT_SMALL);
+            print_xy("Press any key", CENTER, display_height - 24);
+
+        }
 
         flip_frame();
 
@@ -118,16 +127,25 @@ void render_score(int last_score){
 
         last_time = current_time;
 
-        key_type key=get_input();
+        // check if time has passed 3 seconds, then allow key presses
+        if (current_time - start_time > wait_time_until_key_press){
+            allow_key_presses = true;
+        }
 
-        switch(key) {
-            case LEFT_DOWN: 
-            case RIGHT_DOWN: 
-                return;
-                break;
+        if (allow_key_presses){
 
-            default: 
-                break;
+            key_type key = get_input();
+
+            switch(key) {
+                case LEFT_DOWN: 
+                case RIGHT_DOWN: 
+                    return;
+                    break;
+
+                default: 
+                    break;
+            }
+
         }
         
     }
